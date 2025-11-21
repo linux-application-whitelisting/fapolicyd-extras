@@ -7,6 +7,8 @@ import re
 import subprocess
 import sys
 from typing import Deque, Iterable, Optional, TextIO
+import os
+import time
 
 ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 READY_MARKER = "Starting to listen for events"
@@ -65,11 +67,105 @@ def validate_buffer_size(size: int) -> None:
 
 
 
+def append_fapolicyd_state(path: str) -> None:
+    """Append fapolicyd diagnostic information to the given file.
+
+    This will:
+    - trigger a state dump from the running fapolicyd daemon
+    - append CPU/core information
+    - append the contents of fapolicyd.state
+    """
+    cpu_cores = os.cpu_count()
+    fapolicyd_version: Optional[str] = None
+    # Try to obtain the fapolicyd version
+    try:
+        result = subprocess.run(
+            ["fapolicyd", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            fapolicyd_version = result.stdout.strip()
+    except Exception as exc:  # pragma: no cover - diagnostic only
+        sys.stderr.write(
+            f"[facapture] Warning: failed to query fapolicyd version: {exc}\n"
+        )
+
+    state_contents = ""
+    # Trigger a fresh state dump if possible
+    try:
+        pid_result = subprocess.run(
+            ["pidof", "fapolicyd"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=2,
+        )
+        if pid_result.returncode == 0 and pid_result.stdout.strip():
+            pid = pid_result.stdout.strip().split()[0]
+            try:
+                subprocess.run(
+                    ["kill", "-USR1", pid],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                    timeout=2,
+                )
+                time.sleep(1)
+            except Exception as exc:  # pragma: no cover - diagnostic only
+                sys.stderr.write(
+                    f"[facapture] Warning: failed to signal fapolicyd: {exc}\n"
+                )
+        # Read the state file regardless; it might already exist
+        try:
+            with open(
+                "/var/run/fapolicyd/fapolicyd.state", "r", encoding="utf-8"
+            ) as state_file:
+                state_contents = state_file.read()
+        except OSError as exc:  # pragma: no cover - diagnostic only
+            sys.stderr.write(
+                f"[facapture] Warning: failed to read fapolicyd.state: {exc}\n"
+            )
+    except Exception as exc:  # pragma: no cover - diagnostic only
+        sys.stderr.write(
+            f"[facapture] Warning: failed to obtain fapolicyd pid: {exc}\n"
+        )
+
+    try:
+        with open(path, "a", encoding="utf-8") as output:
+            output.write(" ===== environment =====\n")
+            if cpu_cores is not None:
+                output.write(f"CPU threads: {cpu_cores}\n")
+            else:
+                output.write("CPU threads: unknown\n")
+            if fapolicyd_version:
+                output.write(f"fapolicyd version: {fapolicyd_version}\n")
+            output.write(" ===== fapolicyd.state =====\n")
+            if state_contents:
+                output.write(state_contents)
+            else:
+                output.write("(no fapolicyd.state content available)\n")
+    except OSError as exc:  # pragma: no cover - diagnostic only
+        sys.stderr.write(
+            f"[facapture] Warning: failed to append fapolicyd state: {exc}\n"
+        )
+
+
+
 def write_buffer(buffer: Iterable[str], path: str) -> None:
-    """Write the buffered lines to the specified file."""
+    """Write the buffered lines to the specified file, then append diagnostics."""
     with open(path, "w", encoding="utf-8") as output:
         for line in buffer:
             output.write(line)
+    # Best-effort append additional info; don't fail capture if this breaks.
+    try:
+        append_fapolicyd_state(path)
+    except Exception as exc:  # pragma: no cover - diagnostic only
+        sys.stderr.write(
+            f"[facapture] Warning: unable to append fapolicyd diagnostics: {exc}\n"
+        )
 
 
 
