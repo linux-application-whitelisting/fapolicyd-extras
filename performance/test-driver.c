@@ -6,6 +6,7 @@
 #include <linux/fanotify.h>
 #include <stdlib.h>
 #include <stdatomic.h>
+#include <sys/time.h>
 #include "policy.h"
 #include "message.h"
 #include "daemon-config.h"
@@ -98,6 +99,7 @@ int initialize_fapolicyd(void)
 int main(void)
 {
 	char cmd[80];
+	struct timeval t0, t1;
 
 	if (getuid() !=  0) {
 		puts("You need to be root");
@@ -117,6 +119,9 @@ int main(void)
 	// Start the perf recording
 	snprintf(cmd, sizeof(cmd), cmd_template, our_pid);
 	system(cmd);
+
+	// Start the timer
+	gettimeofday(&t0, NULL);
 
 	FILE *file_list = fopen("file-list.txt", "r");
 	if (file_list == NULL)
@@ -139,6 +144,17 @@ int main(void)
 
 //	teardown();
 //	close(resp_fd);
+
+	// Stop the timer and output results
+	gettimeofday(&t1, NULL);
+	long seconds1  = t1.tv_sec  - t0.tv_sec;
+	long useconds1 = t1.tv_usec - t0.tv_usec;
+	long mseconds1 = useconds1 / 1000;
+	if (mseconds1 < 0) {
+		mseconds1 += 1000;
+		seconds1--;
+	}
+	printf("Elapsed: %ld seconds, %ld milliseconds\n",seconds1,mseconds1);
 
 	return 0;
 }
