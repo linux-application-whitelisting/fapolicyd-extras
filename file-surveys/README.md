@@ -33,7 +33,7 @@ vi Makefile     #  <-- edit the path to ../../fapolicyd/src
 make
 ```
 
-Run the binary as root so it can subscribe to fanotify permission events and write its findings after it receives `SIGINT` (Ctrl+C) or `SIGTERM`. Example output from a desktop run:
+Run the binary as root so it can subscribe to fanotify permission events and collect file usage information. Let it run for a couple hours or a day. When it receives `SIGINT` (Ctrl+C) or `SIGTERM`, it will write to stdout the 100 most used file types. (You can use `tee` to copy it to a file if needed.) Example output from a desktop run:
 
 ```
 application/x-sharedlib	4233
