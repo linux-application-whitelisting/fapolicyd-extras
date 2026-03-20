@@ -120,12 +120,12 @@ int main(void)
 	snprintf(cmd, sizeof(cmd), cmd_template, our_pid);
 	system(cmd);
 
-	// Start the timer
-	gettimeofday(&t0, NULL);
-
 	FILE *file_list = fopen("file-list.txt", "r");
 	if (file_list == NULL)
 		return 2;
+
+	// Start the timer
+	gettimeofday(&t0, NULL);
 
 	// Loop over the files to similate cache hits
 	unsigned int i;
@@ -142,19 +142,19 @@ int main(void)
 
 	stop = 1;
 
-//	teardown();
-//	close(resp_fd);
-
 	// Stop the timer and output results
 	gettimeofday(&t1, NULL);
 	long seconds1  = t1.tv_sec  - t0.tv_sec;
 	long useconds1 = t1.tv_usec - t0.tv_usec;
-	long mseconds1 = useconds1 / 1000;
-	if (mseconds1 < 0) {
-		mseconds1 += 1000;
+	if (useconds1 < 0) {
+		useconds1 += 1000000;
 		seconds1--;
 	}
-	printf("Elapsed: %ld seconds, %ld milliseconds\n",seconds1,mseconds1);
+	long mseconds1 = useconds1 / 1000;
+	printf("Elapsed: %ld seconds, %ld milliseconds\n", seconds1, mseconds1);
+
+//	teardown();
+//	close(resp_fd);
 
 	return 0;
 }
