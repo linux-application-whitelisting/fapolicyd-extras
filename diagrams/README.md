@@ -6,7 +6,11 @@ This directory contains diagrams to help understand how fapolicyd works internal
 
 ![Class Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-class-diagram.png)
 
-## Sequence diagram
+## Decision Sequence Diagram
 
-![Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-sequence-diagram.png)
+![Decision Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-sequence-diagram.png)
+
+## Trust Update Sequence Diagram
+![Trust Update Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-trust-update-seq-diag.png)
+
 
