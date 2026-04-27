@@ -8,5 +8,5 @@ This directory contains diagrams to help understand how fapolicyd works internal
 
 ## Sequence diagram
 
-![Class Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-sequence-diagram.png)
+![Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-sequence-diagram.png)
 
