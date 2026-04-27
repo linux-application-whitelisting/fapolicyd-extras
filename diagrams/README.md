@@ -14,11 +14,11 @@ This directory contains diagrams to help understand how fapolicyd works internal
 
 ![Trust Update Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-trust-update-seq-diag.png)
 
-## Reload and State Report Sequence Diagrams
+## Reload Sequence Diagram
 
 ![Reload Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-reload-sequence-diagram.png)
 
-## Detailed State Report Sequence Diagram
+## State Report Sequence Diagram
 
 ![State Report Sequence Diagram](https://github.com/linux-application-whitelisting/fapolicyd-extras/blob/assets/fapolicyd-1.4.4-state-rpt-seq-giag.png)
 
